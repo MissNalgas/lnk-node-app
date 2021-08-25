@@ -20,13 +20,18 @@ app.use(express.static("static"));
 
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(session({
+const sess = {
     name: "lnkcookie",
     secret,
     resave: false,
     saveUninitialized: false,
-    cookie: {secure: (process.env.NODE_ENV === "test") ? false : true, maxAge: 60 * 60 * 24 *5 * 1000}
-}));
+    cookie: {maxAge: 60 * 60 * 24 *5 * 1000}
+};
+if (process.env.NODE_ENV !== "development") {
+    app.set("trust proxy", 1);
+    sess.cookie.secure = true;
+}
+app.use(session(sess));
 app.use(router);
 
 app.listen(port, () => {
