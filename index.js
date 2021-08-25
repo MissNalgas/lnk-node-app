@@ -28,7 +28,7 @@ const sess = {
     cookie: {maxAge: 60 * 60 * 24 *5 * 1000}
 };
 if (process.env.NODE_ENV !== "development") {
-    app.set("trust proxy", 1);
+    app.set("trust proxy", "loopback");
     sess.cookie.secure = true;
 }
 app.use(session(sess));
