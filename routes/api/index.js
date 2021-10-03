@@ -64,7 +64,7 @@ function makeid(length) {
 async function addUserToDataBase(email, username, firstname, lastname) {
     return new Promise((resolve, reject) => {
 
-        key = makeid(20);
+        const key = makeid(20);
 
         db.run("INSERT INTO accounts (key, email, username, firstname, lastname) VALUES (?, ?, ?, ?, ?)", [key, email, username, firstname, lastname], (err) => {
             if (err) return reject(err)
@@ -109,7 +109,6 @@ router.post("/createuser", (req, res) => {
     createUser(email, password, username, firstname, lastname).then(() => {
         return res.json({code: 200, message: "Account created succesfully"})
     }).catch((err) => {
-        console.error(err);
         const code = 500;
         res.statusCode = code;
         return res.json({code, err})
@@ -123,7 +122,6 @@ router.get("/getuser" , (req, res) => {
     getUser(cookie).then((user) => {
         return res.json({code: 200, user})
     }).catch((err) => {
-        console.error("/getuser", err)
         const code = 401;
         res.statusCode = code;
         res.json({code, err})
@@ -145,7 +143,6 @@ router.post("/login", (req, res) => {
         req.session.sessionCookie = sessionCookie;
         return res.json({code: 200, message: "Success"})
     }).catch((err) => {
-        console.error("/login", err);
         const code = 401;
         res.statusCode = code;
         return res.json({code, err});
