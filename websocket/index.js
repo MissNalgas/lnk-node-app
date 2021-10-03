@@ -5,7 +5,9 @@ const PORT = 8081;
 
 const ClientHandler = require("./clientHandler");
 
-const clientHandler = new ClientHandler();
+const CLIENT_TIMER = 1000*60*30; // Every 30 minutues
+
+const clientHandler = new ClientHandler(CLIENT_TIMER);
 
 
 const wss = new WebSocket.Server({
@@ -24,8 +26,7 @@ wss.on("connection", (ws) => {
 
         switch (code) {
             case "init": {
-                const msgs = clientHandler.addClient(id, ws);
-                ws.send(JSON.stringify({code: 'success', content: msgs}));
+                clientHandler.addClient(id, ws);
                 break;
             }
                 

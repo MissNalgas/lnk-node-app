@@ -1,23 +1,21 @@
 const WebSocket = require("ws");
 
 module.exports = class ClientHandler {
-    constructor() {
+    constructor(timer) {
         this.ids = [];
         this.wsById = {};
         this.mgsById = {};
+        this.timer = timer;
         this._manageWs();
     }
 
     async _removeDisabledWs(id) {
-        const wss = this.wsById[id];
-        let dirty = false;
-        for (let ws of wss) {
-            if (ws.readyState === WebSocket.OPEN) {
-                dirty = true;
-                break;
-            }
-        }
-        if (!dirty) {
+        let wss = this.wsById[id];
+        
+        //filter
+        wss = wss.filter((ws) => ws.readyStateState === WebSocket.OPEN);
+
+        if (wss.length === 0) {
             this.removeClient(id);
         }
     }
@@ -33,7 +31,7 @@ module.exports = class ClientHandler {
         for (let id of this.ids) {
             this._removeDisabledWs(id);
         }
-        setTimeout(() => this._manageWs(), 5000);
+        setTimeout(() => this._manageWs(), this.timer);
     }
 
     addClient(newId, newWs) {
@@ -49,6 +47,7 @@ module.exports = class ClientHandler {
             this.wsById[newId] = ws;
             this.mgsById[newId] = msgs;
         }
+        newWs.send(JSON.stringify({code: 'success', content: this.mgsById[newId]}));
         return this.mgsById[newId];
     }
 
