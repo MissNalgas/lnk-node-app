@@ -25,7 +25,7 @@ const sess = {
     secret,
     resave: false,
     saveUninitialized: false,
-    cookie: {maxAge: 60 * 60 * 24 *5 * 1000}
+    cookie: {maxAge: 60 * 60 * 24 *5 * 1000, sameSite: true}
 };
 if (process.env.NODE_ENV !== "development") {
     app.set("trust proxy", "loopback");
