@@ -1,22 +1,29 @@
 const WebSocket = require("ws");
+const DEFAULT_TIMEOUT = 1000 * 60 * 30; //30 minutes timeout
 
 module.exports = class ClientHandler {
     constructor(timer) {
         this.ids = [];
         this.wsById = {};
         this.mgsById = {};
+        this.timeoutById = {};
+
         this.timer = timer;
         this._manageWs();
     }
 
     async _removeDisabledWs(id) {
         let wss = this.wsById[id];
-        
         //filter
-        wss = wss.filter((ws) => ws.readyStateState === WebSocket.OPEN);
+        wss = wss.filter((ws) => ws.readyState === WebSocket.OPEN);
 
         if (wss.length === 0) {
-            this.removeClient(id);
+            const timeOut = this.timeoutById[id] || 0;
+            if (timeOut <= Date.now()) {
+                this.removeClient(id);
+            }
+        } else {
+            this.timeoutById[id] = Date.now() + DEFAULT_TIMEOUT;
         }
     }
 
@@ -46,6 +53,7 @@ module.exports = class ClientHandler {
             this.ids.push(newId);
             this.wsById[newId] = ws;
             this.mgsById[newId] = msgs;
+            this.timeoutById[newId] = Date.now() + DEFAULT_TIMEOUT;
         }
         newWs.send(JSON.stringify({code: 'success', content: this.mgsById[newId]}));
         return this.mgsById[newId];

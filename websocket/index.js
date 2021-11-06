@@ -5,7 +5,7 @@ const PORT = 8081;
 
 const ClientHandler = require("./clientHandler");
 
-const CLIENT_TIMER = 1000*60*30; // Every 30 minutues
+const CLIENT_TIMER = 1000 * 10; // Every 10 seconds
 
 const clientHandler = new ClientHandler(CLIENT_TIMER);
 
