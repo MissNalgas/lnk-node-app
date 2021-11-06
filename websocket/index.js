@@ -1,5 +1,6 @@
 const WebSocket = require("ws");
 const validUrl = require("valid-url");
+const isImg = require('../utils/is-image');
 const PORT = 8081;
 
 
@@ -31,9 +32,15 @@ wss.on("connection", (ws) => {
             }
                 
             case "message": {
-                let endMessage = "";
+                let endMessage = {};
+
                 if (validUrl.isUri(message)) {
-                    endMessage = {type: "url", message};
+                    if (isImg(message)) {
+                        endMessage = {type: 'img', message};
+                    } else {
+                        endMessage = {type: "url", message};
+                    }
+                    
                 } else {
                     endMessage = {type: 'text', message};
                 }
