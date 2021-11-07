@@ -5,7 +5,7 @@ const {auth} = require("firebase");
 const serviceAccount = require("../../secret/serviceAccountKey.json");
 const sqlite3 = require("sqlite3")
 const db = new sqlite3.Database("lnk")
-const {API_KEY} = require("../../secret/lnkSecret");
+const {API_KEY, IMAGE_KEY} = require("../../secret/lnkSecret");
 
 //START-FIREBASE
 
@@ -168,7 +168,7 @@ router.post('/signimage', (req, res) => {
 
     getUser(cookie).then((usr) => {
         const expire = (Date.now() / 1000) + (60*10);
-        const hmac = createHmac('sha1', 'private_qBPbwMK8vAGHriYBMlBZRHp2TDM=');
+        const hmac = createHmac('sha1', IMAGE_KEY);
         hmac.update(token+expire);
         
 
