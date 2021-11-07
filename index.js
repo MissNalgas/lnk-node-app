@@ -18,7 +18,7 @@ app.set("views", "./views");
 app.set("view engine", "html");
 app.use(express.static("static"));
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(cookieParser());
 const sess = {
     name: "lnkcookie",

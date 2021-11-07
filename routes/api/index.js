@@ -156,4 +156,29 @@ router.get("/logout", (req, res) => {
     return res.json({code: 200, message: "Log out succesful"});
 })
 
+const { createHmac } = require('crypto');
+
+router.post('/signimage', (req, res) => {
+    const cookie = req.session.sessionCookie || '';
+    const {token} = req.body;
+    if (!token) {
+        res.statusCode = 400;
+        res.send({message: 'Bad request'});
+    }
+
+    getUser(cookie).then((usr) => {
+        const expire = (Date.now() / 1000) + (60*10);
+        const hmac = createHmac('sha1', 'private_qBPbwMK8vAGHriYBMlBZRHp2TDM=');
+        hmac.update(token+expire);
+        
+
+        return res.send({code: 200, signature: hmac.digest('hex'), expire});
+
+    }).catch(() => {
+        res.statusCode = 401;
+        return res.send({code: 401, message: 'Unauthenticated'});
+    })
+
+});
+
 module.exports = router;
