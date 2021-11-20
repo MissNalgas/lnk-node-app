@@ -181,4 +181,6 @@ router.post('/signimage', (req, res) => {
 
 });
 
+router.use('/notification', require('./notification'));
+
 module.exports = router;
