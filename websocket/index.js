@@ -19,7 +19,7 @@ const wss = new WebSocket.Server({
 wss.on("connection", (ws) => {
     
     ws.on("message", (data) => {
-        if (data === 'ping') return ws.send('pong');
+        if (data.toString() === 'ping') return ws.send('pong');
 
         let dataObj = JSON.parse(data);
         if (!("code" in dataObj && "message" in dataObj && "id" in dataObj)) return;
