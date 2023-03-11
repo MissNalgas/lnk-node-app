@@ -1,6 +1,6 @@
 const WebSocket = require("ws");
 const DEFAULT_TIMEOUT = 1000 * 60 * 30; //30 minutes timeout
-const crypto = require('crypto');
+const { generateId } = require('../utils/random');
 
 module.exports = class ClientHandler {
     constructor(timer) {
@@ -66,7 +66,7 @@ module.exports = class ClientHandler {
         const ws = this.wsById[id];
 
         const msgs = this.mgsById[id];
-        msgs.unshift({...message, uid: crypto.randomUUID()});
+        msgs.unshift({...message, uid: generateId()});
         this.mgsById[id] = msgs;
 
         for (const s of ws) {
