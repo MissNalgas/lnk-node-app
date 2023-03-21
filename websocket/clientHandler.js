@@ -62,7 +62,16 @@ module.exports = class ClientHandler {
     }
 
     clearMessages(id) {
-        if (this.mgsById[id]?.length) this.mgsById[id] = [];
+        if (this.mgsById[id]?.length) {
+            this.mgsById[id] = [];
+            
+            const wss = this.wsById[id];
+            for (const ws of ws) {
+                ws.send(JSON.stringify({code: 'message', content: []}));
+            }
+        }
+
+
     }
 
     sendMessage(id, message) {
