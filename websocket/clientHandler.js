@@ -66,7 +66,7 @@ module.exports = class ClientHandler {
             this.mgsById[id] = [];
             
             const wss = this.wsById[id];
-            for (const ws of ws) {
+            for (const ws of wss) {
                 ws.send(JSON.stringify({code: 'message', content: []}));
             }
         }
