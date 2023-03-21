@@ -11,6 +11,7 @@ module.exports = class ClientHandler {
 
         this.timer = timer;
         this._manageWs();
+        this.clearMessages = this.clearMessages.bind(this);
     }
 
     async _removeDisabledWs(id) {
@@ -58,6 +59,10 @@ module.exports = class ClientHandler {
         }
         newWs.send(JSON.stringify({code: 'success', content: this.mgsById[newId]}));
         return this.mgsById[newId];
+    }
+
+    clearMessages(id) {
+        if (this.mgsById[id]?.length) this.mgsById[id] = [];
     }
 
     sendMessage(id, message) {

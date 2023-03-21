@@ -49,6 +49,11 @@ wss.on("connection", (ws) => {
                 clientHandler.sendMessage(id, endMessage);
                 break;
             }
+
+            case "clear": {
+                clientHandler.clearMessages(id);
+                break;
+            }
                 
             default:
                 break;
