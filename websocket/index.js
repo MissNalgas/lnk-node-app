@@ -22,9 +22,9 @@ wss.on("connection", (ws) => {
         if (data.toString() === 'ping') return ws.send('pong');
 
         let dataObj = JSON.parse(data);
-        if (!("code" in dataObj && "message" in dataObj && "id" in dataObj)) return;
+        if (!("code" in dataObj && "message" in dataObj && "id" in dataObj && "sender" in dataObj)) return;
 
-        const {code, message, id} = dataObj;
+        const {code, message, id, sender} = dataObj;
 
         switch (code) {
             case "init": {
@@ -37,13 +37,13 @@ wss.on("connection", (ws) => {
 
                 if (validUrl.isUri(message)) {
                     if (isImg(message)) {
-                        endMessage = {type: 'img', message};
+                        endMessage = {type: 'img', message, sender};
                     } else {
-                        endMessage = {type: "url", message};
+                        endMessage = {type: "url", message, sender};
                     }
                     
                 } else {
-                    endMessage = {type: 'text', message};
+                    endMessage = {type: 'text', message, sender};
                 }
 
                 clientHandler.sendMessage(id, endMessage);
