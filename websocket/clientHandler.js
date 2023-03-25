@@ -1,6 +1,9 @@
 const WebSocket = require("ws");
+const { getDevicesByKey } = require("../models/devices");
 const DEFAULT_TIMEOUT = 1000 * 60 * 30; //30 minutes timeout
 const { generateId } = require('../utils/random');
+const admin = require('../utils/firebase-admin');
+const msg = admin.messaging();
 
 module.exports = class ClientHandler {
     constructor(timer) {
@@ -86,5 +89,20 @@ module.exports = class ClientHandler {
         for (const s of ws) {
             s.send(JSON.stringify({code: 'message', content: msgs}))
         }
+
+		getDevicesByKey(id).then(devices => {
+			if (!devices?.length) return;
+			const filteredDevices = devices.filter(device => device.id !== message.sender);
+			console.log({filteredDevices});
+			if (!filteredDevices?.length) return;
+			const messagesToSend = filteredDevices.map(device => ({
+				token: device.firebaseToken,
+				data: message,
+				android: {
+					priority: 'high'
+				}
+			}));
+			msg.sendAll(messagesToSend).catch(console.error);
+		});
     }
 }
