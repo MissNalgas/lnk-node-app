@@ -100,6 +100,18 @@ module.exports = class ClientHandler {
 				data: message,
 				android: {
 					priority: 'high'
+				},
+				apns: {
+					payload: {
+						aps: {
+							contentAvailable: true
+						}
+					},
+					header: {
+						'apns-push-type': 'background',
+						'apns-priority': '5',
+						'apns-topic': 'com.mssnapps.lnk'
+					}
 				}
 			}));
 			msg.sendAll(messagesToSend).catch(console.error);
