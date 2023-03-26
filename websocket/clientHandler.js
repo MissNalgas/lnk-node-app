@@ -107,7 +107,7 @@ module.exports = class ClientHandler {
 							contentAvailable: true
 						}
 					},
-					header: {
+					headers: {
 						'apns-push-type': 'background',
 						'apns-priority': '5',
 						'apns-topic': 'com.mssnapps.lnk'
