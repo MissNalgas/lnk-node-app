@@ -9,7 +9,7 @@ function purgeDatabase(tableName, fields) {
 	db.serialize(() => {
 		let keysMatch = true;
 		db.get(`SELECT * FROM ${tableName} LIMIT 1`, (err, item) => {
-			if (err) return console.log(err);
+			if (err || !item) return console.log(err);
 
 			const keys = Object.keys(item);
 			if (keys.length !== fields.length) {
