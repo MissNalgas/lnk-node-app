@@ -160,6 +160,7 @@ router.post('/signimage', (req, res) => {
 
 });
 
+router.use('/notification', require('./notification-no-auth'));
 router.use('/notification',authMiddleware, require('./notification'));
 
 module.exports = router;

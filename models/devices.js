@@ -8,11 +8,14 @@ const STATUS = {
 function _startDB() {
 	return new Promise((resolve, reject) => {
 		const db = new sqlite3.Database(DB_NAME);
-		db.run('CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY, platform TEXT, firebaseToken TEXT, key TEXT)', (err) => {
-			if (err) return reject(err);
+		db.serialize(() => {
+			db.run('CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY, platform TEXT, firebaseToken TEXT, key TEXT, revokeToken TEXT)', (err) => {
+				if (err) return reject(err);
 
-			resolve(db);
-		})
+				resolve(db);
+			});
+		});
+
 
 	});
 }
@@ -27,9 +30,9 @@ function _getDeviceById(db, id) {
 	});
 }
 
-function _saveDevice(db, id, platform, firebaseToken, key) {
+function _saveDevice(db, id, platform, firebaseToken, key, revokeToken) {
 	return new Promise((resolve, reject) => {
-		db.run('INSERT INTO devices (id, platform, firebaseToken, key) VALUES (?, ?, ?, ?)', [id, platform, firebaseToken, key], (err, value) => {
+		db.run('INSERT INTO devices (id, platform, firebaseToken, key, revokeToken) VALUES (?, ?, ?, ?, ?)', [id, platform, firebaseToken, key, revokeToken], (err, value) => {
 			if (err) return reject(err);
 			return resolve(value);
 		})
@@ -45,27 +48,30 @@ function _queryDeviceByKey(db, key) {
 	})
 }
 
-function _removeDeviceByKey(db, id, userKey) {
+function _removeDeviceByKey(db, id, revokeToken) {
 	return new Promise((resolve, reject) => {
 		db.serialize(() => {
-			db.get('SELECT * FROM devices WHERE id=? AND key=?', [id, userKey], (err, device) => {
+			db.get('SELECT * FROM devices WHERE id=?', [id], (err, device) => {
 				if (err) return reject(err);
+				console.log(device)
 				if (!device) return reject(new Error('The device does not exist'));
+				if (device.revokeToken !== revokeToken) return reject(new Error('Invalid revoke token'));
 			})
-			db.run('DELETE FROM devices WHERE id=? AND key=?', [id, userKey], (err) => {
+			db.run('DELETE FROM devices WHERE id=? AND revokeToken=?', [id, revokeToken], (err, a) => {
 				if (err) return reject(err);
+				console.log({err, a});
 				return resolve();
 			});
 		});
 	})
 }
 
-async function storeDeviceIfDoesntExist(id, platform, firebaseToken, key) {
+async function storeDeviceIfDoesntExist(id, platform, firebaseToken, key, revokeToken) {
 	const db = await _startDB();
 	const device = await _getDeviceById(db, id);
 
 	if (!device) {
-		await _saveDevice(db, id, platform, firebaseToken, key);
+		await _saveDevice(db, id, platform, firebaseToken, key, revokeToken);
 		db.close();
 		return STATUS.NEW;
 	}
@@ -81,9 +87,9 @@ async function getDevicesByKey(key) {
 	return devices;
 }
 
-async function deleteDeviceByKey(key, userKey) {
+async function deleteDeviceByKey(key, revokeToken) {
 	const db = await _startDB();
-	await _removeDeviceByKey(db, key, userKey);
+	await _removeDeviceByKey(db, key, revokeToken);
 	db.close();
 }
 
