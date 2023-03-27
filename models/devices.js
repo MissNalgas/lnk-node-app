@@ -45,6 +45,21 @@ function _queryDeviceByKey(db, key) {
 	})
 }
 
+function _removeDeviceByKey(db, id, userKey) {
+	return new Promise((resolve, reject) => {
+		db.serialize(() => {
+			db.get('SELECT * FROM devices WHERE id=? AND key=?', [id, userKey], (err, device) => {
+				if (err) return reject(err);
+				if (!device) return reject(new Error('The device does not exist'));
+			})
+			db.run('DELETE FROM devices WHERE id=? AND key=?', [id, userKey], (err) => {
+				if (err) return reject(err);
+				return resolve();
+			});
+		});
+	})
+}
+
 async function storeDeviceIfDoesntExist(id, platform, firebaseToken, key) {
 	const db = await _startDB();
 	const device = await _getDeviceById(db, id);
@@ -66,8 +81,15 @@ async function getDevicesByKey(key) {
 	return devices;
 }
 
+async function deleteDeviceByKey(key, userKey) {
+	const db = await _startDB();
+	await _removeDeviceByKey(db, key, userKey);
+	db.close();
+}
+
 module.exports = {
 	storeDeviceIfDoesntExist,
 	getDevicesByKey,
+	deleteDeviceByKey,
 	STATUS
 };
