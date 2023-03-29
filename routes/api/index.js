@@ -8,7 +8,6 @@ const {API_KEY, IMAGE_KEY} = require("../../secret/lnkSecret");
 const { getUser } = require('../../utils/authentication');
 const { authMiddleware } = require("../../middleware/auth");
 
-
 //START-FIREBASE
 
 const firebaseConfig = {
@@ -162,5 +161,7 @@ router.post('/signimage', (req, res) => {
 
 router.use('/notification', require('./notification-no-auth'));
 router.use('/notification',authMiddleware, require('./notification'));
+
+router.use('/upload-file',authMiddleware, require('./upload-file'));
 
 module.exports = router;
