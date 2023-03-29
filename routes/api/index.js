@@ -1,34 +1,27 @@
 const router = require("express").Router();
-const admin = require("firebase-admin");
+const admin = require('../../utils/firebase-admin');
 const firebase = require("firebase/app");
 const {auth} = require("firebase");
-const serviceAccount = require("../../secret/serviceAccountKey.json");
 const sqlite3 = require("sqlite3")
 const db = new sqlite3.Database("lnk")
 const {API_KEY, IMAGE_KEY} = require("../../secret/lnkSecret");
+const { getUser } = require('../../utils/authentication');
+const { authMiddleware } = require("../../middleware/auth");
 
 //START-FIREBASE
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCDPxMhXJ5IVpABK_VnBHZgZWAvQIsrASg",
-  authDomain: "link-b9d06.firebaseapp.com",
-  projectId: "link-b9d06",
-  storageBucket: "link-b9d06.appspot.com",
-  messagingSenderId: "910969346020",
-  appId: "1:910969346020:web:fdef4cf16d47e6134699f1",
-  measurementId: "G-DVSJ1ZEVP5"
+  apiKey: "AIzaSyB_baY-4hwFfFedYOnYV-8NHjCrvRbFuIE",
+  authDomain: "mssn-lnk.firebaseapp.com",
+  projectId: "mssn-lnk",
+  storageBucket: "mssn-lnk.appspot.com",
+  messagingSenderId: "955405464456",
+  appId: "1:955405464456:web:6ee9b6ffa058ea3aab403d"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
 
-async function verifyCookie(cookie) {
-    const decodedClaims = await admin.auth().verifySessionCookie(cookie, true);
-    return {decodedClaims};
-}
 
 async function signIn(email, pass) {
     const currentUser = await auth().signInWithEmailAndPassword(email, pass);
@@ -39,15 +32,6 @@ async function signIn(email, pass) {
     return {sessionCookie}
 }
 
-async function getUserFromEmail(email) {
-    return new Promise((resolve, reject) => {
-        db.get("SELECT * FROM accounts WHERE email=?", email, (err, account) => {
-            if (err) return reject(err);
-
-            resolve(account);
-        })
-    })
-}
 /*
 * Copied from StackOverFlow, how it must be.
 */
@@ -74,12 +58,6 @@ async function addUserToDataBase(email, username, firstname, lastname) {
     })
 }
 
-async function getUser(sessionCookie) {
-    const {decodedClaims} = await verifyCookie(sessionCookie)
-    const email = decodedClaims.email;
-    const user = await getUserFromEmail(email);
-    return user;
-}
 
 async function createUser(email, password, username, firstname, lastname) {
     const userCredentials = await auth().createUserWithEmailAndPassword(email, password);
@@ -166,7 +144,7 @@ router.post('/signimage', (req, res) => {
         res.send({message: 'Bad request'});
     }
 
-    getUser(cookie).then((usr) => {
+    getUser(cookie).then(() => {
         const expire = (Date.now() / 1000) + (60*10);
         const hmac = createHmac('sha1', IMAGE_KEY);
         hmac.update(token+expire);
@@ -181,6 +159,9 @@ router.post('/signimage', (req, res) => {
 
 });
 
-router.use('/notification', require('./notification'));
+router.use('/notification', require('./notification-no-auth'));
+router.use('/notification',authMiddleware, require('./notification'));
+
+router.use('/upload-file',authMiddleware, require('./upload-file'));
 
 module.exports = router;

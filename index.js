@@ -36,4 +36,4 @@ app.use(router);
 
 app.listen(port, () => {
     console.log("Init on port ", port);
-})
+});
