@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const sharp = require('sharp');
 
+const storage = new Map();
+
 router.get('/', async (req, res) => {
 
 	try {
@@ -17,29 +19,13 @@ router.get('/', async (req, res) => {
 			sharp().resize({width: wNumber, height: hNumber}).flatten({background: '#ffffff'}).jpeg()
 		);
 		
-		got.stream(img).pipe(sharpStream).pipe(res);
+		got.stream(img, {cache: storage}).pipe(sharpStream).pipe(res);
 	} catch(err) {
 		console.error(err);
 
 		res.status(500).send({message: 'Server error'});
 	}
 
-});
-
-router.get('/url', async (req, res) => {
-
-	try {
-		const {default: got} = await import('got');
-		const {url} = req.query;
-		if (!url) return res.status(400).send('bad request');
-
-		got.stream(url).pipe(res);
-
-	} catch(err) {
-		console.error(err);
-		res.status(500).send({err});
-	}
-	
 });
 
 module.exports = router;
