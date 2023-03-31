@@ -163,5 +163,6 @@ router.use('/notification', require('./notification-no-auth'));
 router.use('/notification',authMiddleware, require('./notification'));
 
 router.use('/upload-file',authMiddleware, require('./upload-file'));
+router.use('/image-proxy', require('./image-proxy'));
 
 module.exports = router;
