@@ -1,11 +1,16 @@
-const { getUser } = require('../utils/authentication');
+const {default: admin} = require('firebase-admin');
 
 async function authMiddleware(req, res, next) {
 	try {
 
-		const cookie = req.session.sessionCookie || "";
-		const user = await getUser(cookie);
+		const authHeader = req.get('authorization');
+		if (!authHeader) return res.status(400).send({message: 'Authorization header is missing'});
 
+		if (!(/Bearer \S+/.test(authHeader))) return res.status(400).send({message: 'Bad formatted authorization header'});
+
+		const token = authHeader.split(' ')[1];
+		const decodedClaims = await admin.auth().verifyIdToken(token, true);
+		const user = await admin.auth().getUser(decodedClaims.uid);
 		res.locals.user = user;
 
 		next();
