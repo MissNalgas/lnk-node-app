@@ -7,7 +7,7 @@ const { generateId } = require('../../../utils/random');
 router.post('/register',requiredKeys(['key', 'firebaseToken', 'platform']), async (req, res) => {
 	try {
 		const {key, firebaseToken, platform} = req.body;
-		const userKey = res.locals.user.key;
+		const userKey = res.locals.user.uid;
 		const revokeToken = generateId(64);
 		const status = await storeDeviceIfDoesntExist(key, platform, firebaseToken, userKey, revokeToken);
 
